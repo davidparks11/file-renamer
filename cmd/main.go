@@ -7,6 +7,7 @@ import (
 
 	"github.com/davidparks11/file-renamer/pkg/config"
 	"github.com/davidparks11/file-renamer/pkg/fileactions"
+	"github.com/davidparks11/file-renamer/pkg/gdrive"
 	"github.com/davidparks11/file-renamer/pkg/logger"
 	"github.com/davidparks11/file-renamer/pkg/logger/loggeriface"
 	"github.com/davidparks11/file-renamer/pkg/schedule"
@@ -43,9 +44,13 @@ func main() {
 		}
 	}()
 
-	//set up file actions
-	fileRenamer := fileactions.NewProcess(logService)
+	//Set up drive service
+	drive := gdrive.NewDriveService(logService)
 
+	//Set up file actions
+	fileRenamer := fileactions.NewProcess(logService, drive)
+
+	//Set up scheduler
 	scheduler = schedule.NewScheduleService(logService)
 
 	for _, schedule := range cfg.CronSchedules {
