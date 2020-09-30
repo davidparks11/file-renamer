@@ -28,16 +28,18 @@ const (
 //Service facilitates logging by writing to a log file at three levels
 type Service struct {
 	Level            int
+	logToConsole     bool
 	path             string
 	file             *os.File
 	fileCreationDate *time.Time
+	fatalLogger      *log.Logger
 	errorLogger      *log.Logger
 	warnLogger       *log.Logger
 	infoLogger       *log.Logger
 }
 
 //NewLogService serves a new log Service
-func NewLogService(level int, logPath string) loggeriface.Service {
+func NewLogService(level int, logPath string, logToConsole bool) loggeriface.Service {
 
 	//time for file creation
 	fileCreationTime := time.Now()
@@ -56,12 +58,14 @@ func NewLogService(level int, logPath string) loggeriface.Service {
 
 	service := Service{
 		Level:            level,
+		logToConsole:     logToConsole,
 		path:             logPath,
 		file:             logFile,
 		fileCreationDate: &fileCreationTime,
 		warnLogger:       log.New(logFile, "WARNING: ", log.Ldate|log.Ltime),
 		infoLogger:       log.New(logFile, "INFO: ", log.Ldate|log.Ltime),
 		errorLogger:      log.New(logFile, "ERROR: ", log.Ldate|log.Ltime),
+		fatalLogger:      log.New(logFile, "FATAL: ", log.Ldate|log.Ltime),
 	}
 	return &service
 }
@@ -92,6 +96,18 @@ func ParseLogLevel(logLevel string) (level int) {
 	return
 }
 
+//Fatal writes a fatal message to logs and exits program
+func (s *Service) Fatal(msg string) {
+	if s.isNewLogDay() {
+		s.refresh()
+	}
+	if s.logToConsole {
+		fmt.Println("FATAL: ", msg)
+	}
+
+	s.fatalLogger.Fatal(msg)
+}
+
 //Error writes an error message to logs
 func (s *Service) Error(msg string) {
 	if !s.isLoggable(ERROR) {
@@ -100,6 +116,10 @@ func (s *Service) Error(msg string) {
 	if s.isNewLogDay() {
 		s.refresh()
 	}
+	if s.logToConsole {
+		fmt.Println("ERROR: ", msg)
+	}
+
 	s.errorLogger.Println(msg)
 }
 
@@ -111,6 +131,10 @@ func (s *Service) Warn(msg string) {
 	if s.isNewLogDay() {
 		s.refresh()
 	}
+	if s.logToConsole {
+		fmt.Println("WARN: ", msg)
+	}
+
 	s.warnLogger.Println(msg)
 }
 
@@ -122,6 +146,10 @@ func (s *Service) Info(msg string) {
 	if s.isNewLogDay() {
 		s.refresh()
 	}
+	if s.logToConsole {
+		fmt.Println("INFO: ", msg)
+	}
+
 	s.infoLogger.Println(msg)
 }
 

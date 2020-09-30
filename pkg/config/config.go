@@ -19,10 +19,12 @@ const (
 // }
 type Config struct {
 	CredentialsPath string   `json:"credentialsPath"`
+	TokenPath		string	 `json:"tokenPath"`
 	CronSchedules   []string `json:"cronSchedules"`
 	FileRenamePaths []string `json:"FileRenamePaths"`
 	LogLevel        string   `json:"logLevel"`
 	LogLocation     string   `json:"logLocation"`
+	LogToConsole	bool	 `json:"logToConsole"`
 }
 
 //GetConfig returns a config struct after reading config.json

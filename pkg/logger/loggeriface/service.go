@@ -4,6 +4,7 @@ package loggeriface
 type Service interface { 
 	Info(string)
 	Error(string)
+	Fatal(string)
 	Warn(string)
 	Stop()
 }

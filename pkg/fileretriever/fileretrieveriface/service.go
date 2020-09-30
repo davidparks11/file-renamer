@@ -1,8 +1,8 @@
-package gdriveiface
+package fileretrieveriface
 
 import "os"
 
-type Drive interface {
+type FileRetriever interface {
 	GetFileInfo() (*[]os.FileInfo, error)
 	UpdateFiles() error
 }

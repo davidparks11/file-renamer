@@ -2,7 +2,7 @@ package fileactions
 
 import (
 	"github.com/davidparks11/file-renamer/pkg/fileactions/fileactionsiface"
-	"github.com/davidparks11/file-renamer/pkg/gdrive/gdriveiface"
+	"github.com/davidparks11/file-renamer/pkg/fileretriever/fileretrieveriface"
 	"github.com/davidparks11/file-renamer/pkg/logger/loggeriface"
 )
 
@@ -10,14 +10,14 @@ var _ fileactionsiface.Process = &Process{}
 
 type Process struct {
 	logger loggeriface.Service
-	drive gdriveiface.Drive
+	fileRetriever fileretrieveriface.FileRetriever
 	name string
 }
 
-func NewProcess(logger loggeriface.Service, drive gdriveiface.Drive) fileactionsiface.Process {
+func NewProcess(logger loggeriface.Service, fileRetriever fileretrieveriface.FileRetriever) fileactionsiface.Process {
 	return &Process{
 		logger: logger,
-		drive: drive,
+		fileRetriever: fileRetriever,
 		name: "File-Renamer",
 	}
 }
