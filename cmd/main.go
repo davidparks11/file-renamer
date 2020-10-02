@@ -53,6 +53,10 @@ func main() {
 	//Set up scheduler 
 	scheduler = schedule.NewScheduleService(logService)
 
+	if cfg.RunAtLaunch {
+		fileRenamer.Run()
+	}
+	
 	for _, schedule := range cfg.CronSchedules {
 		scheduler.ScheduleJob(schedule, func() {
 			fileRenamer.Run()

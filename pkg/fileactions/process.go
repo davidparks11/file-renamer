@@ -23,5 +23,8 @@ func NewProcess(logger loggeriface.Service, fileRetriever fileretrieveriface.Fil
 }
 
 func (p *Process) Run() {
-	p.fileRetriever.GetFileInfo()
+	_, err := p.fileRetriever.GetFileInfo()
+	if err != nil {
+		p.logger.Error("Couldn't retrieve files - " + err.Error())
+	}
 }

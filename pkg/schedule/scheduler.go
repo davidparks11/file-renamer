@@ -52,4 +52,7 @@ func (s *Scheduler) Run() {
 	signal.Notify(s.sigChannel, syscall.SIGINT, syscall.SIGTERM)
 	<-s.sigChannel
 	s.cron.Stop()
+	if s.cron == nil {
+		s.logger.Info("Cron is nil after stop")
+	}
 }

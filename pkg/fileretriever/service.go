@@ -19,6 +19,12 @@ import (
 
 var _ fileretrieveriface.FileRetriever = &FileRetriever{}
 
+type node struct {
+	id string
+	name string
+	children []*node
+}
+
 const (
 	MAX_FILE_RESULTS = 10
 	PROCESSED_PROP_FIELD = "processed"
@@ -31,22 +37,106 @@ type FileRetriever struct {
 	drive  *drive.Service
 }
 
-//GetFileInfo returns all files that match description from config
-func (d *FileRetriever) GetFileInfo() (*[]os.FileInfo, error) {
-	files, err := d.drive.Files.List().
-	DriveId(d.config.ParentDirID).
-	Q("mimeType='application/vnd.google-apps.video'" +
-		"and " + PROCESSED_PROP_FIELD + " = false" +
-		"and trashed = false").
-	MaxResults(MAX_FILE_RESULTS).Do() 
+func (d *FileRetriever) buildFileTree() {
+	//get map of parent to file
+	var files map[string]drive.File
+	err := d.drive.Files.
+		List().
+		MaxResults(3000).
+		Pages(
+			context.TODO(),
+			func(folders *drive.FileList) error {
+				for _, v := range folders.Items {
+					files[v.Parents[0].Id] = *v
+				}
+				return nil
+			},
+		)
+
 	if err != nil {
-		d.logger.Error("Failed to get files: " + err.Error())
-	}
-	for _, v := range files.Items {
-		d.logger.Info(v.TeamDriveId)
+		d.logger.Error(err.Error())
 	}
 
+}
+
+//GetFileInfo returns all files that match description from config
+func (d *FileRetriever) GetFileInfo() (*[]os.FileInfo, error) {
+	// please, err := d.drive.Files.List().Do()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if len(please.Items) == 0 {
+	// 	d.logger.Info("No Drives available")
+	// } else {
+	// 	for _, v := range please.Items {
+	// 		d.logger.Info("Name: " + v.Title + "\tID: " + v.Id)
+	// 	}
+	// } mimeType = 'application/vnd.google-apps.folder'
+
+	
+	var folderIds []string
+	err := d.drive.Children.List(d.config.ParentDirID).
+		MaxResults(200).
+		Pages(
+			context.TODO(),
+			func(folders *drive.ChildList) error {
+				for _, v := range folders.Items {
+					folderIds = append(folderIds, v.Id)
+				}
+				return nil
+			},
+		)
+
+	if err != nil {
+		d.logger.Error(err.Error())
+	}
+	if len(folderIds) == 0 {
+		d.logger.Info("Couldn't find any IDs")
+	} else {
+		d.logger.Info(fmt.Sprintf("Found %d ids", len(folderIds)))
+	}
+
+	query := d.buildFileQuery()
+	d.logger.Info("query: " + query)
+
+	var videos []*drive.File
+	err = d.drive.Files.List().
+		MaxResults(200).
+		Q(query).
+		Pages(
+			context.TODO(),
+			func(videoList *drive.FileList) error {
+				for _, v := range videoList.Items {
+					videos = append(videos, v)
+				}
+				return nil
+			},
+		)
+	
+	if err != nil {
+		d.logger.Error(err.Error())
+	}
+	if len(videos) == 0 {
+		d.logger.Info("Couldn't find any videos")
+	} else {
+		d.logger.Info(fmt.Sprintf("Found %d videos", len(videos)))
+	}
+
+	for i, v := range videos {
+		d.logger.Info(fmt.Sprintf("Index: %d\t%s", i, v.Title))
+	}
+
+
+
 	return nil, nil
+}
+
+func (d *FileRetriever) buildFileQuery() string {
+	query := fmt.Sprintf("'%s' in parents ", d.config.ParentDirID) 
+	// for _, v := range d.config.FileExtensions {
+	// 	query += fmt.Sprintf("or name contains '.%s' ", v)
+	// }
+	return query
 }
 
 func (d *FileRetriever) UpdateFiles() error {

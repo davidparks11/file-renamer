@@ -12,20 +12,27 @@ const (
 //Config type represents the json struct to hold this applications Config.
 //Example:
 // {
-//     "credentialsPath": "",
-//     "cronSchedules":"",
-//     "fileRenamePaths":"captures/**/*.mp4",
-//	   "logLocation":"logs/"
+//	"cronSchedules":["*/5 * * * *"],
+//	"parentDirID": "craaaazy id here",
+//	"fileExtensions":["mp4", ".MOV"],
+//	"logLevel": "3",
+//	"logLocation":"C:\Users\amazingUser\allOfMyLogs",
+//	"credentialsPath": "resources/superSecret/credentials.json",
+//	"tokenPath": "resources/superSuperSecret/token.json",
+//	"runAtLaunch": true,
+//	"logToConsole": true
 // }
+
 type Config struct {
-	CredentialsPath string   `json:"credentialsPath"`
-	TokenPath		string	 `json:"tokenPath"`
 	CronSchedules   []string `json:"cronSchedules"`
-	ParentDirID		string   `json:"parentDirID"`
-	FileRenamePaths []string `json:"FileRenamePaths"`
+	ParentDirID     string   `json:"parentDirID"`
+	FileExtensions  []string `json:"fileExtensions"`
 	LogLevel        string   `json:"logLevel"`
 	LogLocation     string   `json:"logLocation"`
-	LogToConsole	bool	 `json:"logToConsole"`
+	CredentialsPath string   `json:"credentialsPath"`
+	TokenPath       string   `json:"tokenPath"`
+	RunAtLaunch     bool     `json:"RunAtLaunch"`
+	LogToConsole    bool     `json:"logToConsole"`
 }
 
 //GetConfig returns a config struct after reading config.json
