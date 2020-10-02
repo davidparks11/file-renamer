@@ -23,5 +23,5 @@ func NewProcess(logger loggeriface.Service, fileRetriever fileretrieveriface.Fil
 }
 
 func (p *Process) Run() {
-	
+	p.fileRetriever.GetFileInfo()
 }

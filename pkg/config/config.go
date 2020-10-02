@@ -21,6 +21,7 @@ type Config struct {
 	CredentialsPath string   `json:"credentialsPath"`
 	TokenPath		string	 `json:"tokenPath"`
 	CronSchedules   []string `json:"cronSchedules"`
+	ParentDirID		string   `json:"parentDirID"`
 	FileRenamePaths []string `json:"FileRenamePaths"`
 	LogLevel        string   `json:"logLevel"`
 	LogLocation     string   `json:"logLocation"`

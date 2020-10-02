@@ -14,9 +14,15 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v2"
+	"google.golang.org/api/option"
 )
 
 var _ fileretrieveriface.FileRetriever = &FileRetriever{}
+
+const (
+	MAX_FILE_RESULTS = 10
+	PROCESSED_PROP_FIELD = "processed"
+)
 
 //FileRetriever type that serves to get files and write changes to files
 type FileRetriever struct {
@@ -27,6 +33,18 @@ type FileRetriever struct {
 
 //GetFileInfo returns all files that match description from config
 func (d *FileRetriever) GetFileInfo() (*[]os.FileInfo, error) {
+	files, err := d.drive.Files.List().
+	DriveId(d.config.ParentDirID).
+	Q("mimeType='application/vnd.google-apps.video'" +
+		"and " + PROCESSED_PROP_FIELD + " = false" +
+		"and trashed = false").
+	MaxResults(MAX_FILE_RESULTS).Do() 
+	if err != nil {
+		d.logger.Error("Failed to get files: " + err.Error())
+	}
+	for _, v := range files.Items {
+		d.logger.Info(v.TeamDriveId)
+	}
 
 	return nil, nil
 }
@@ -55,8 +73,8 @@ func NewFileRetriever(logger loggeriface.Service, config *config.Config) fileret
 		logger.Fatal("Unable to parse client secret file to config: " + err.Error())
 	}
 	client := fileRetriever.getClient(oauthConfig)
-
-	drive, err := drive.New(client)
+	
+	drive, err := drive.NewService(context.Background(), option.WithHTTPClient(client))
 	if err != nil {
 		logger.Fatal("Unable to retrieve Drive client: " + err.Error())
 	}
@@ -70,7 +88,7 @@ func (d *FileRetriever) getClient(oauthConfig *oauth2.Config) *http.Client {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
-	token, err := d.tokenFromFile(d.config.TokenPath)
+	token, err := d.tokenFromFile()
 	if err != nil {
 		token = d.getTokenFromWeb(oauthConfig)
 		d.saveToken(token)
@@ -97,8 +115,8 @@ func (d *FileRetriever) getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 }
 
 // Retrieves a token from a local file.
-func (d *FileRetriever) tokenFromFile(file string) (*oauth2.Token, error) {
-	f, err := os.Open(file)
+func (d *FileRetriever) tokenFromFile() (*oauth2.Token, error) {
+	f, err := os.Open(d.config.TokenPath)
 	if err != nil {
 		return nil, err
 	}
@@ -118,19 +136,3 @@ func (d *FileRetriever) saveToken(token *oauth2.Token) {
 	defer f.Close()
 	json.NewEncoder(f).Encode(token)
 }
-
-/*
-r, err := srv.Files.List().PageSize(10).
-		Fields("nextPageToken, files(id, name)").Do()
-	if err != nil {
-		logger.Fatal("Unable to retrieve files: " + err.Error())
-	}
-	fmt.Println("Files:")
-	if len(r.Files) == 0 {
-		fmt.Println("No files found.")
-	} else {
-		for _, i := range r.Files {
-			fmt.Printf("%s (%s)\n", i.Name, i.Id)
-		}
-	}
-*/
