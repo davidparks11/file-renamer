@@ -1,8 +1,14 @@
 package fileretrieveriface
 
-import "os"
+type RenameInfo struct {
+	ID 	 string
+	Name string
+	CreatedDate string
+}
 
 type FileRetriever interface {
-	GetFileInfo() (*[]os.FileInfo, error)
-	UpdateFiles() error
+	GetFileInfo() ([]*RenameInfo, error)
+	IsUniqueName(name string) bool
+	GetProcessedFiles(date string) map[string]bool
+	UpdateFile(*RenameInfo) error
 }

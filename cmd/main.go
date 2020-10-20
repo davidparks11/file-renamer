@@ -48,7 +48,7 @@ func main() {
 	ft := fileretriever.NewFileRetriever(logService, cfg)
 
 	//Set up file actions
-	fileRenamer := fileactions.NewProcess(logService, ft)
+	fileRenamer := fileactions.NewProcess(logService, ft, cfg)
 
 	//Set up scheduler 
 	scheduler = schedule.NewScheduleService(logService)

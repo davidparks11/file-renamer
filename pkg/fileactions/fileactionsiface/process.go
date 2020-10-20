@@ -1,5 +1,5 @@
 package fileactionsiface
 
 type Process interface {
-	Run()
+	Run() error
 }
