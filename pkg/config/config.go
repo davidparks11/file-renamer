@@ -14,6 +14,8 @@ const (
 // {
 //	"cronSchedules":["*/5 * * * *"],
 //	"parentDirID": "craaaazy id here",
+//  "persistentWords" : ["keep", "these", "words", "in", "names"],
+//	"nameDelimiter" : "_",
 //	"fileExtensions":["mp4", ".MOV"],
 //	"logLevel": "3",
 //	"logLocation":"C:\Users\amazingUser\allOfMyLogs",
@@ -26,6 +28,8 @@ const (
 type Config struct {
 	CronSchedules   []string `json:"cronSchedules"`
 	ParentDirID     string   `json:"parentDirID"`
+	PersistentWords []string `json:"persistentWords"`
+	NameDelimiter	string	 `json:"nameDelimiter"`
 	FileExtensions  []string `json:"fileExtensions"`
 	LogLevel        string   `json:"logLevel"`
 	LogLocation     string   `json:"logLocation"`
@@ -46,5 +50,6 @@ func GetConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &config, nil
 }
