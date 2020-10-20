@@ -31,8 +31,8 @@ func NewProcess(logger loggeriface.Service, fileRetriever fileretrieveriface.Fil
 		fileRetriever: fileRetriever,
 		name: "File-Renamer",
 		config: config,
-		processedFiles: make(map[string]bool),
-		nameFlushDate: now(),
+		processedFiles: nil,
+		nameFlushDate: now().Add(-24*time.Hour),
 	}
 }
 
@@ -49,7 +49,7 @@ func (r *Renamer) Run() error {
 	}
 
 	//remove file name history if a day has passed
-	if now().Sub(r.nameFlushDate).Hours() > 24 {
+	if now().Sub(r.nameFlushDate).Hours() >= 24 {
 		r.nameFlushDate = now()
 		//get files as old as two days ago
 		r.processedFiles = r.fileRetriever.GetProcessedFiles(now().Add(time.Hour * 48).Format(time.RFC3339))

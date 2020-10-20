@@ -162,7 +162,7 @@ func (f *FileRetriever) buildFileQuery(folderIds []string) (query string) {
 const processedQuery = "properties has {key='" + fileProcessedFlag + "' and value='true' and visibility='PUBLIC'}"
 
 func (f *FileRetriever) GetProcessedFiles(date string) map[string]bool {
-	var processedFiles map[string]bool
+	processedFiles := make(map[string]bool)
 	query := f.buildFileQuery(f.queryableFolders)
 	query += "and " + processedQuery
 	err := f.drive.Files.List().
@@ -181,6 +181,7 @@ func (f *FileRetriever) GetProcessedFiles(date string) map[string]bool {
 	if err != nil {
 		f.logger.Error(err.Error())
 	}
+	f.logger.Info(fmt.Sprintf("Found %d processed files", len(processedFiles)))
 	return processedFiles
 }
 
