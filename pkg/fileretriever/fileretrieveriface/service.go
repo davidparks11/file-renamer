@@ -9,6 +9,6 @@ type RenameInfo struct {
 type FileRetriever interface {
 	GetFileInfo() ([]*RenameInfo, error)
 	IsUniqueName(name string) bool
-	GetProcessedFiles(date string) map[string]bool
+	GetProcessedFiles() map[string]bool
 	UpdateFile(*RenameInfo) error
 }

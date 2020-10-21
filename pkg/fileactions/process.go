@@ -20,7 +20,6 @@ type Renamer struct {
 	name string
 	config *config.Config
 	processedFiles map[string]bool
-	nameFlushDate time.Time
 }
 
 //NewProcess returns a Renamer that uniquely names each file based 
@@ -32,7 +31,6 @@ func NewProcess(logger loggeriface.Service, fileRetriever fileretrieveriface.Fil
 		name: "File-Renamer",
 		config: config,
 		processedFiles: nil,
-		nameFlushDate: now().Add(-24*time.Hour),
 	}
 }
 
@@ -48,12 +46,8 @@ func (r *Renamer) Run() error {
 		return err
 	}
 
-	//remove file name history if a day has passed
-	if now().Sub(r.nameFlushDate).Hours() >= 24 {
-		r.nameFlushDate = now()
-		//get files as old as two days ago
-		r.processedFiles = r.fileRetriever.GetProcessedFiles(now().Add(time.Hour * 48).Format(time.RFC3339))
-	}
+	//get all processed files. Runs each time in case of deletions
+	r.processedFiles = r.fileRetriever.GetProcessedFiles()
 
 	for _, file := range files {
 		file.Name, err = r.generateNewName(file.Name, file.CreatedDate)

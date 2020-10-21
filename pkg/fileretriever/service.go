@@ -161,10 +161,12 @@ func (f *FileRetriever) buildFileQuery(folderIds []string) (query string) {
 
 const processedQuery = "properties has {key='" + fileProcessedFlag + "' and value='true' and visibility='PUBLIC'}"
 
-func (f *FileRetriever) GetProcessedFiles(date string) map[string]bool {
+//GetProcessedFiles returns any files that contain the processed flag property
+// with a value of "true"
+func (f *FileRetriever) GetProcessedFiles() map[string]bool {
 	processedFiles := make(map[string]bool)
-	query := f.buildFileQuery(f.queryableFolders)
-	query += "and " + processedQuery
+	query :=  f.buildFileQuery(f.queryableFolders)
+	query += "and (" + processedQuery + ") "
 	err := f.drive.Files.List().
 		MaxResults(1000).
 		Q(query).
@@ -185,7 +187,7 @@ func (f *FileRetriever) GetProcessedFiles(date string) map[string]bool {
 	return processedFiles
 }
 
-//IsUniqueName returns nil if no file is found with the same name, otherwise, returns false
+//IsUniqueName returns true if no file is found with the same name, otherwise, returns false
 func (f *FileRetriever) IsUniqueName(name string) bool {
 	response, err := f.drive.Files.List().
 		Q("title = '" + name + "'").Do()
@@ -211,6 +213,10 @@ func (f *FileRetriever) UpdateFile(info *fileretrieveriface.RenameInfo) error {
 		Title: info.Name,
 		Properties: []*drive.Property{processedProp},
 	}
+
+	//respect write rate limits
+	f.writeLimiter.Wait(context.Background())
+
 	_, err := f.drive.Files.Update(info.ID, file).Do()
 	return err
 }
@@ -246,7 +252,6 @@ func NewFileRetriever(logger loggeriface.Service, config *config.Config) fileret
 	if err != nil {
 		logger.Fatal("Unable to retrieve Drive client: " + err.Error())
 	}
-
 	fileRetriever.drive = drive
 	return fileRetriever
 }

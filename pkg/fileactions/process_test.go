@@ -27,7 +27,6 @@ func TestFileActions(t *testing.T) {
 				PersistentWords: []string{"foo", "bar"},
 				NameDelimiter:   "_",
 			},
-			nameFlushDate:  mockToday.Add(-72 * time.Hour),
 			processedFiles: map[string]bool{"2010_0111_0.mov": true},
 		}
 		Describe("generateNewName()", func() {
@@ -84,7 +83,7 @@ func TestFileActions(t *testing.T) {
 
 			now = func() time.Time { return mockToday }
 
-			mockRetriever.On("GetProcessedFiles", mockToday.Add(time.Hour * 48).Format(time.RFC3339)).Return(processedFiles)
+			mockRetriever.On("GetProcessedFiles").Return(processedFiles)
 
 			updatedFiles := []*fileretrieveriface.RenameInfo {
 				{ID:"11111111", Name:"foo_2020_0831_0.mov", CreatedDate:"2020-08-31T19:33:44.561Z"},

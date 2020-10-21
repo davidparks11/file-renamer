@@ -55,8 +55,8 @@ func (m *MockFileRetriever) UpdateFile(info *fileretrieveriface.RenameInfo) erro
 	return args.Error(0)
 }
 
-func (m *MockFileRetriever) GetProcessedFiles(date string) map[string]bool {
+func (m *MockFileRetriever) GetProcessedFiles() map[string]bool {
 	//files := map[string]bool {"foo_2020_0901.mov": true}
-	args := m.Called(date)
+	args := m.Called()
 	return args.Get(0).(map[string]bool)
 }
