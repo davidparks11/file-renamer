@@ -231,8 +231,8 @@ func NewFileRetriever(logger loggeriface.Service, config *config.Config) fileret
 	}
 
 	//establish rate limiter for reads/writes
-	wl := rate.NewLimiter(rate.Every(time.Minute), writeLimitPerMinute)
-	rl := rate.NewLimiter(rate.Every(time.Minute), readLimitPerMinute)
+	wl := rate.NewLimiter(rate.Every(time.Minute/writeLimitPerMinute), 1)
+	rl := rate.NewLimiter(rate.Every(time.Minute/readLimitPerMinute), 1)
 	fileRetriever.readLimiter = rl
 	fileRetriever.writeLimiter = wl
 	
