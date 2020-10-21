@@ -41,6 +41,7 @@ var now = func() time.Time {
 
 //Run is called on a repeated schedule by a scheduler
 func (r *Renamer) Run() error {
+	r.logger.Info(fmt.Sprintf("~~~~ %s started ~~~~", r.name))
 	files, err := r.fileRetriever.GetFileInfo()
 	if err != nil {
 		return err
@@ -63,6 +64,7 @@ func (r *Renamer) Run() error {
 		r.logger.Info("Updated file name to " + file.Name)
 		r.processedFiles[file.Name] = true
 	}
+	r.logger.Info(fmt.Sprintf("~~~~ %s ended ~~~~", r.name))
 	return nil
 }
 
